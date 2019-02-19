@@ -640,6 +640,13 @@ NSInteger const kIQPreviousNextButtonToolbarTag     =   -1005;
 
     [self showLog:[NSString stringWithFormat:@"Need to move: %.2f",move]];
 
+    // Fix for movement of field down when there is hardware keyboard attached
+    if (move < 0 && kbSize.height > 0)
+    {
+        [self showLog:[NSString stringWithFormat:@"As movement required is negative and keyboard seems to be still there, aborting ..."]];
+        return;
+    }
+    
     UIScrollView *superScrollView = nil;
     UIScrollView *superView = (UIScrollView*)[textFieldView superviewOfClassType:[UIScrollView class]];
 
@@ -1066,6 +1073,10 @@ NSInteger const kIQPreviousNextButtonToolbarTag     =   -1005;
     if (CGRectIsNull(intersectRect))
     {
         _kbSize = CGSizeMake(screenSize.size.width, 0);
+    }
+    else if (CGRectIsEmpty(intersectRect) && CGRectGetHeight(kbFrame) > 0) // Weird iOS 12 issue where UIKeyboardFrameEndUserInfoKey returns bad origin for final keyboard frame
+    {
+        _kbSize = kbFrame.size;
     }
     else
     {
